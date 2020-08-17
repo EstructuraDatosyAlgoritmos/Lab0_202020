@@ -64,6 +64,38 @@ def loadCSVFile (file, lst, sep=";"):
     t1_stop = process_time() #tiempo final
     print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
 
+def loadCSVFile2 (file, lst, sep=";"):
+    """
+    Carga un archivo csv a una lista
+    Args:
+        file 
+            Archivo de texto del cual se cargaran los datos requeridos.
+        lst :: []
+            Lista a la cual quedaran cargados los elementos despues de la lectura del archivo.
+        sep :: str
+            Separador escodigo para diferenciar a los distintos elementos dentro del archivo.
+    Try:
+        Intenta cargar el archivo CSV a la lista que se le pasa por parametro, si encuentra algun error
+        Borra la lista e informa al usuario
+    Returns: None   
+    """
+    del lst[:]
+    print("Cargando archivo ....")
+    t2_start = process_time() #tiempo inicial
+    dialect = csv.excel()
+    dialect.delimiter=sep
+    try:
+        with open(file, encoding="utf-8") as csvfile:
+            spamreader = csv.DictReader(csvfile, dialect=dialect)
+            for row in spamreader: 
+                lst.append(row)
+    except:
+        del lst[:]
+        print("Se presento un error en la carga del archivo")
+    
+    t2_stop = process_time() #tiempo final
+    print("Tiempo de ejecución ",t2_stop-t2_start," segundos")
+
 
 
 def printMenu():
@@ -125,8 +157,10 @@ def main():
         inputs =input('Seleccione una opción para continuar\n') #leer opción ingresada
         if len(inputs)>0:
             if int(inputs[0])==1: #opcion 1
-                loadCSVFile("Data/MoviesCastingRaw-small.csv", lista) #llamar funcion cargar datos                              
+                loadCSVFile("Data/MoviesCastingRaw-small.csv", lista) #llamar funcion cargar datos  
+                loadCSVFile2("Data/SmallMoviesDetailsCleaned.csv" , lista)                            
                 print("Datos cargados, "+str(len(lista))+" elementos cargados")
+                
             elif int(inputs[0])==2: #opcion 2
                 if len(lista)==0: #obtener la longitud de la lista
                     print("La lista esta vacía")    
