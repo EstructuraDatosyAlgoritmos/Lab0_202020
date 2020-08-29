@@ -62,6 +62,7 @@ def loadCSVFile (file, lst, sep=";"):
     
     t1_stop = process_time() #tiempo final
     print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
+    
 
 def printMenu():
     """
@@ -72,6 +73,7 @@ def printMenu():
     print("2- Contar los elementos de la Lista")
     print("3- Contar elementos filtrados por palabra clave")
     print("4- Consultar elementos a partir de dos listas")
+    print("5- Consultar todas las peliculas de un director")
     print("0- Salir")
 
 def countElementsFilteredByColumn(criteria, column, lst):
@@ -114,6 +116,38 @@ def promedio_votos_peli(lista_ids,lst):
  
     promedio = suma_votos / len(lista_ids)
     return promedio
+
+def conocer_un_director(criteria,lst1,lst2):
+
+     if len(lst1) == 0 or len(lst2) == 0:
+        print("Alguna de las listas está vacía.")
+     else:
+        pelis_director=[]
+        info={}
+        tit=[]
+        vote_av=[]
+        num_pelis=0
+        filas = len(lst1)
+        i=1
+        while i < filas:
+            director_name = lst2[i]['director_name']
+            if director_name == criteria:
+                tit.append(lst1[i]['title'])
+
+                info['Titulos peliculas']=tit
+                num_pelis+=1
+                vote_av.append(float(lst1[i]['vote_average']))
+            i+=1
+        sum_vote_av=sum(vote_av)
+        info['Promedio votos peliculas']=round(sum_vote_av/len(vote_av),2)
+        info['Total peliculas']=num_pelis
+        pelis_director.append(info)
+     return pelis_director
+
+
+
+
+
 def countElementsByCriteria(criteria, column, lst1, lst2):
     """
     Retorna la cantidad de elementos que cumplen con un criterio para una columna dada
@@ -172,6 +206,7 @@ def main():
                 loadCSVFile("Data/MoviesCastingRaw-small.csv", lista_2) #llamar funcion cargar datos del segundo archivo
                 print("Archivo: SmallMoviesDetailsCleaned.csv"+"\nDatos cargados, "+str(len(lista_1))+" elementos cargados")
                 print("\nArchivo: MoviesCastingRaw.csv"+"\nDatos cargados, "+str(len(lista_2))+" elementos cargados")
+                
             elif int(inputs[0])==2: #opcion 2
                 i = True
                 lista = input("\n1.SmallMoviesDetailsCleaned"+"\n2.MoviesCastingRaw-small"+"\nIngrese la lista que quiere consultar:")
@@ -206,6 +241,9 @@ def main():
                 criteria =input('Ingrese el criterio de búsqueda\n')
                 counter=countElementsByCriteria(criteria,12,lista_1,lista_2)
                 print("Coinciden ",counter[0]," elementos con el crtierio: '", criteria, "\nCon un promedio de votos de: ", counter[1])
+            elif int(inputs[0])==5: #opcion 5
+                criteria=input('Ingrese el nombre del director que desea consultar\n')
+                print(conocer_un_director(criteria,lista_1,lista_2))
             elif int(inputs[0])==0: #opcion 0, salir
                 sys.exit(0)
 
