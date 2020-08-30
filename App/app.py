@@ -30,6 +30,8 @@ import config as cf
 import sys
 import csv
 from time import process_time 
+from Sorting import mergesort as mg
+from DataStructures import liststructure as lt
 
 def loadCSVFile (file, lst, sep=";"):
     """
@@ -71,7 +73,8 @@ def printMenu():
     print("1- Cargar Datos")
     print("2- Contar los elementos de la Lista")
     print("3- Contar elementos filtrados por palabra clave")
-    print("4- Consultar elementos a partir de dos listas")
+    print("4- Encontrar buenas películas")
+    print("6- Ranking de películas")
     print("0- Salir")
 
 def countElementsFilteredByColumn(criteria, column, lst):
@@ -100,6 +103,7 @@ def countElementsFilteredByColumn(criteria, column, lst):
         t1_stop = process_time() #tiempo final
         print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
     return counter
+
 def promedio_votos_peli(lista_ids,lst):
     
     suma_votos = 0
@@ -111,9 +115,9 @@ def promedio_votos_peli(lista_ids,lst):
                 vote = float(lst[i]["vote_average"])
                 suma_votos = suma_votos + vote
             i +=1
- 
     promedio = suma_votos / len(lista_ids)
     return promedio
+
 def countElementsByCriteria(criteria, column, lst1, lst2):
     """
     Retorna la cantidad de elementos que cumplen con un criterio para una columna dada
@@ -129,12 +133,10 @@ def countElementsByCriteria(criteria, column, lst1, lst2):
         filas = len(lst2)
         while j < filas:
             director_name = lst2[j][column]
-            print(director_name)
             if director_name == criteria:
                 id = lst2[j][0]
                 id_peliculas_director.append(id)
             j +=1
-
 
         for id in id_peliculas_director:
             i = 0
@@ -149,10 +151,46 @@ def countElementsByCriteria(criteria, column, lst1, lst2):
 
         t1_stop = process_time() #tiempo final
         print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
-    promedio = promedio_votos_peli(id_peliculas_director,lst1)
+        promedio = promedio_votos_peli(id_peliculas_director,lst1)
     return counter , promedio
 
+def greater_rating(elem1,elem2):
+    return float(elem1["vote_average"]) > float(elem2["vote_average"])
 
+def greater_num(elem1,elem2):
+    return float(elem1["vote_count"]) > float(elem2["vote_count"])
+
+def ranking_genero(genero:str, num_peliculas:int, lst1:list, lst2:list,criterio:int):
+
+    t1_start = process_time() #tiempo inicial
+    movies_lt = lt.newList(datastructure='ARRAY_LIST', cmpfunction = None) 
+    j = 1
+    filas = len(lst1)
+    while j < filas:
+        elemento = lst1[j]["genres"]
+        if genero in elemento:
+            movie_name = lst1[j]["original_title"]
+            movie_vote_average = float(lst1[j]["vote_average"])
+            movie_vote_count = float(lst1[j]["vote_count"])
+            
+            movie = {'movie_name': movie_name, 'vote_average': movie_vote_average, 'vote_count': movie_vote_count}
+            lt.addLast(movies_lt,movie)             
+        j = j + 1
+
+    if criterio == 1:
+         mg.mergesort(movies_lt,greater_num)   
+    if criterio == 2:
+         mg.mergesort(movies_lt,greater_rating) 
+
+    pedazo_mejores = lt.subList(movies_lt,1,num_peliculas)
+    pos_inicial_peores = lt.size(movies_lt)-num_peliculas
+    pedazo_peores = lt.subList(movies_lt,pos_inicial_peores,num_peliculas)
+
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
+    return pedazo_mejores["elements"] , pedazo_peores["elements"]
+ 
+            
 def main():
     """
     Método principal del programa, se encarga de manejar todos los metodos adicionales creados
@@ -208,6 +246,13 @@ def main():
                 print("Coinciden ",counter[0]," elementos con el crtierio: '", criteria, "\nCon un promedio de votos de: ", counter[1])
             elif int(inputs[0])==0: #opcion 0, salir
                 sys.exit(0)
+
+            elif int(inputs[0])==6: #opcion 6
+                genero = input("Ingrese el género de búsqueda:\n")
+                numero = int(input("Ingrese el número de películas que quiere ver en el ranking:\n"))
+                criterio= int(input("Ingrese:\n1. Si quiere ordenar por Número de votos.\n2. Si quiere ordenar por Calificación.\n"))
+                ranking=ranking_genero(genero,numero,lista_1,lista_2,criterio)
+                print("El TOP ",numero," de mejores peículas es: (Nombre, Calificación, Número de votos)\n",ranking[0],"\n\nEl TOP ",numero,"de peores películas es:(Nombre, Calificación, Número de votos)\n",ranking[1])
 
 if __name__ == "__main__":
     main()
