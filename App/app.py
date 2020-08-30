@@ -163,14 +163,34 @@ def conocer_un_actor(criteria,lst1,lst2):
         print("Alguna de las listas está vacía.")
     else:
         t1_start = process_time() #tiempo inicial
+        pelis_actor=lt.newList(datastructure='ARRAY_LIST', cmpfunction = None)
+        info={}
+        tit=lt.newList(datastructure='ARRAY_LIST', cmpfunction = None)
+        vote_av=lt.newList(datastructure='ARRAY_LIST', cmpfunction = None)
+        num_pelis=0
         i=1
-        filas=len(lst1)
+        filas=len(lst2)
         while i<filas:
-            print(lst2[i].values)
-            #if criteria in lst2[i].values():
-                
+            if criteria in lst2[i]['actor1_name'] or criteria in lst2[i]['actor2_name'] or criteria in lst2[i]['actor3_name'] or criteria in lst2[i]['actor4_name'] or criteria in lst2[i]['actor5_name']:
+                lt.addLast(tit,lst1[i]['title'])
+                info['Titulos peliculas']=tit
+                num_pelis+=1
+                lt.addLast(vote_av,float(lst1[i]['vote_average']))   
+            
         
-        i+=1
+            i+=1
+        if lt.size(vote_av)==1:
+            info['Promedio votos peliculas']=lt.getElement(vote_av,1)
+        else:
+            suma=0
+            for j in range(0,lt.size(vote_av)):
+                suma=suma + lt.getElement(vote_av,j)
+        info['Promedio votos peliculas']=round(suma/lt.size(vote_av),2)
+        info['Total peliculas']=num_pelis
+        lt.addLast(pelis_actor,info)
+        t1_stop=process_time()
+        print("Tiempo de ejecucion",t1_stop)
+    return pelis_actor
 
 
 
