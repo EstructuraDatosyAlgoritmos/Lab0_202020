@@ -30,6 +30,8 @@ import config as cf
 import sys
 import csv
 from time import process_time 
+from Sorting import mergesort as mg
+from DataStructures import liststructure as lt
 
 def loadCSVFile (file, lst, sep=";"):
     """
@@ -74,6 +76,7 @@ def printMenu():
     print("3- Contar elementos filtrados por palabra clave")
     print("4- Consultar elementos a partir de dos listas")
     print("5- Consultar todas las peliculas de un director")
+    print("7- Consultar todas las peliculas en las que ha participado un actor")
     print("0- Salir")
 
 def countElementsFilteredByColumn(criteria, column, lst):
@@ -122,27 +125,52 @@ def conocer_un_director(criteria,lst1,lst2):
      if len(lst1) == 0 or len(lst2) == 0:
         print("Alguna de las listas está vacía.")
      else:
-        pelis_director=[]
+        t2_start = process_time() #tiempo inicial
+        pelis_director=lt.newList(datastructure='ARRAY_LIST', cmpfunction = None)
         info={}
-        tit=[]
-        vote_av=[]
+        tit=lt.newList(datastructure='ARRAY_LIST', cmpfunction = None)
+        vote_av=lt.newList(datastructure='ARRAY_LIST', cmpfunction = None)
         num_pelis=0
         filas = len(lst1)
         i=1
         while i < filas:
+            
             director_name = lst2[i]['director_name']
             if director_name == criteria:
-                tit.append(lst1[i]['title'])
+                lt.addLast(tit,lst1[i]['title'])
 
                 info['Titulos peliculas']=tit
                 num_pelis+=1
-                vote_av.append(float(lst1[i]['vote_average']))
+                lt.addLast(vote_av,float(lst1[i]['vote_average']))
             i+=1
-        sum_vote_av=sum(vote_av)
-        info['Promedio votos peliculas']=round(sum_vote_av/len(vote_av),2)
+        if lt.size(vote_av)==1:
+            info['Promedio votos peliculas']=lt.getElement(vote_av,1)
+        else:
+            suma=0
+            for j in range(0,lt.size(vote_av)):
+                suma=suma + lt.getElement(vote_av,j)
+
+        info['Promedio votos peliculas']=round(suma/lt.size(vote_av),2)
         info['Total peliculas']=num_pelis
-        pelis_director.append(info)
+        lt.addLast(pelis_director,info)
+        t2_stop = process_time() #tiempo final
+        print("Tiempo de ejecucion",t2_stop-t2_start)
+
      return pelis_director
+
+def conocer_un_actor(criteria,lst1,lst2):
+    if len(lst1) == 0 or len(lst2) == 0:
+        print("Alguna de las listas está vacía.")
+    else:
+        t1_start = process_time() #tiempo inicial
+        i=1
+        filas=len(lst1)
+        while i<filas:
+            print(lst2[i].values)
+            #if criteria in lst2[i].values():
+                
+        
+        i+=1
 
 
 
@@ -244,6 +272,10 @@ def main():
             elif int(inputs[0])==5: #opcion 5
                 criteria=input('Ingrese el nombre del director que desea consultar\n')
                 print(conocer_un_director(criteria,lista_1,lista_2))
+            elif int(inputs[0])==7: #opcion 7
+                criteria=input('Ingrese el nombre del actor o actriz que desea consultar\n')
+                print(conocer_un_actor(criteria,lista_1,lista_2))
+                
             elif int(inputs[0])==0: #opcion 0, salir
                 sys.exit(0)
 
