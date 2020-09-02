@@ -76,8 +76,10 @@ def printMenu():
     print("3- Contar elementos filtrados por palabra clave")   
     print("4- Encontrar buenas películas")
     print("5- Consultar todas las peliculas de un director")
-    print("6- Ranking de películas")    
+    print("6- Ranking de películas con género")    
     print("7- Consultar todas las peliculas en las que ha participado un actor")
+    print("8- Ranking peliculas")
+    print("9- entender características peliculas")
     print("0- Salir")
 
 def countElementsFilteredByColumn(criteria, column, lst):
@@ -271,7 +273,80 @@ def ranking_genero(genero:str, num_peliculas:int, lst1:list, lst2:list,criterio:
     print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
     return pedazo_mejores["elements"] , pedazo_peores["elements"]
  
-            
+def mejor_calificada(elem1,elem2):
+    return float(elem1["vote_average"]) > float(elem2["vote_average"])
+def peor_calificada(elem1,elem2):
+    return float(elem1["vote_average"]) < float(elem2["vote_average"])
+def peor_votada(elem1,elem2):
+    return float(elem1["vote_average"]) > float(elem2["vote_average"])
+def mejor_votada(elem1,elem2):
+    return float(elem1["vote_count"]) < float(elem2["vote_count"])
+def ranking_peliculas1(num_peliculas:int, lst1:list, lst2:list,criterio1:int):
+    t1_start = process_time() #tiempo inicial
+    movies_lt = lt.newList(datastructure='ARRAY_LIST', cmpfunction = None) 
+    i = 1
+    filas = len(lst1)
+    while i < filas:
+        movie_name = lst1[i]["original_title"]
+        movie_vote_average = float(lst1[i]["vote_average"])
+        movie_vote_count = float(lst1[i]["vote_count"])
+        movie = {'movie_name': movie_name, 'vote_average': movie_vote_average, 'vote_count': movie_vote_count}
+        lt.addLast(movies_lt,movie)            
+    i = i + 1
+
+    if criterio1 == 1:
+         mg.mergesort(movies_lt,mejor_votada)   
+    if criterio1 == 2:
+         mg.mergesort(movies_lt,peor_votada)
+    conjunto_mejores_votadas = lt.subList(movies_lt,1,num_peliculas)
+    pos_inicial_peores_votadas = lt.size(movies_lt)-num_peliculas
+    conjunto_peores = lt.subList(movies_lt,pos_inicial_peores_votadas,num_peliculas)
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
+    return conjunto_mejores_votadas["elements"] , conjunto_peores["elements"]
+def ranking_peliculas2(num_peliculas:int, lst1:list, lst2:list,criterio2:int):
+    t1_start = process_time() #tiempo inicial
+    movies_lt = lt.newList(datastructure='ARRAY_LIST', cmpfunction = None) 
+    i = 1
+    filas = len(lst1)
+    while i < filas:
+        movie_name = lst1[i]["original_title"]
+        movie_vote_average = float(lst1[i]["vote_average"])
+        movie_vote_count = float(lst1[i]["vote_count"])
+        movie = {'movie_name': movie_name, 'vote_average': movie_vote_average, 'vote_count': movie_vote_count}
+        lt.addLast(movies_lt,movie)               
+    i = i + 1
+    if criterio2 == 1:
+         mg.mergesort(movies_lt,mejor_calificada)   
+    if criterio2 == 2:
+         mg.mergesort(movies_lt,peor_calificada)
+    conjunto_mejores_calificadas = lt.subList(movies_lt,1,num_peliculas)
+    pos_inicial_peores_calificadas = lt.size(movies_lt)-num_peliculas
+    conjunto_peores_calificadas = lt.subList(movies_lt,pos_inicial_peores_calificadas,num_peliculas)
+    t1_stop = process_time() #tiempo final
+    print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
+    return conjunto_mejores_calificadas["elements"] , conjunto_peores_calificadas["elements"]
+
+def entender_genero(genero:str, lst1:list,lst2:list):
+    t1_start = process_time() #tiempo inicial
+    if len(lst1) == 0 or len(lst2) == 0:
+        print("Alguna de las listas está vacía.")
+    else:
+        pelis_genero = lt.newList(datastructure='ARRAY_LIST', cmpfunction = None)
+        i = 1
+        nota= 0
+        filas = len(lst1)
+        while i < filas:
+            elemento = lst1[i]["genres"]
+            if genero in elemento:
+                lt.addlast(pelis_genero, lst1[i]["original_title"])
+                nota+=float(lst1[i]["vote_count"])
+                i+=1
+        cantidad = i
+        promedio = nota / cantidad
+        t1_stop = process_time() #tiempo final
+        print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
+    return pelis_genero , cantidad , promedio
 def main():
     """
     Método principal del programa, se encarga de manejar todos los metodos adicionales creados
@@ -342,6 +417,23 @@ def main():
                 criterio= int(input("Ingrese:\n1. Si quiere ordenar por Número de votos.\n2. Si quiere ordenar por Calificación.\n"))
                 ranking=ranking_genero(genero,numero,lista_1,lista_2,criterio)
                 print("El TOP ",numero," de mejores peículas es: (Nombre, Calificación, Número de votos)\n",ranking[0],"\n\nEl TOP ",numero,"de peores películas es:(Nombre, Calificación, Número de votos)\n",ranking[1])
-
+            elif int(inputs[0])==8: #opcion 8
+                numero = int(input("Ingrese el número de películas que quiere ver en el ranking:\n"))
+                criterio1= int(input("Ingrese:\n1. Si quiere ordenar por Número de mejores votadas.\n2. Si quiere ordenar por numero de peores votadas."))
+                criterio2= int(input("Ingrese:\n1. Si quiere ordenar por Número de mejores calificadas.\n2. Si quiere ordenar por numero de peores calificadas."))
+                ranking1=ranking_peliculas1(numero,lista_1,lista_2,criterio1)
+                ranking2=ranking_peliculas2(numero,lista_1,lista_2,criterio2)
+                if criterio1 == 1:
+                    print("El TOP ",numero," de las mejores películas votadas es: (Nombre, Calificación, Número de votos)\n",ranking1[0])
+                elif criterio1 == 2:
+                    print("El TOP ",numero," de las peores películas votadas es: (Nombre, Calificación, Número de votos)\n",ranking1[1])
+                if criterio2 == 1:
+                    print("El TOP ",numero," de las mejores películas calificadas es: (Nombre, Calificación, Número de votos)\n",ranking2[0])
+                if criterio2 == 2:
+                    print("El TOP ",numero," de las peores películas calificadas es: (Nombre, Calificación, Número de votos)\n",ranking2[1])
+            elif int(inputs[0])==9: #opcion 9
+                genero= (input("Ingrese el género que desea utilizar como parámetro:\n"))
+                caracteristicas = entender_genero(genero,lista_1,lista_2)
+                print("Las peliculas asociadas al género son\n", caracteristicas[0], "cuya cantidad de las mismas es\n", caracteristicas[1], "y, además el promedio de votos es\n", caracteristicas[2])
 if __name__ == "__main__":
     main()
