@@ -189,7 +189,7 @@ def conocer_un_actor(criteria,lst1,lst2):
         info['Total peliculas']=num_pelis
         lt.addLast(pelis_actor,info)
         t1_stop=process_time()
-        print("Tiempo de ejecucion",t1_stop)
+        print("Tiempo de ejecucion",t1_stop-t1_start)
     return pelis_actor
 
 
